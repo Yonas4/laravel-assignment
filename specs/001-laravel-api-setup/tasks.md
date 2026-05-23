@@ -20,9 +20,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize composer dependencies for spatie/laravel-data in composer.json
-- [ ] T002 Configure PHP 8.3 strict types verification config in phpunit.xml and pint.json
-- [ ] T003 [P] Create the base api v1 routes file in routes/api_v1.php
+- [x] T001 Initialize composer dependencies for spatie/laravel-data in composer.json
+- [x] T002 Configure PHP 8.3 strict types verification config in phpunit.xml and pint.json
+- [x] T003 [P] Create the base api v1 routes file in routes/api_v1.php
 
 ---
 
@@ -32,13 +32,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Setup Model strict mode `Model::shouldBeStrict()` in app/Providers/AppServiceProvider.php (§C-4)
-- [ ] T005 Create base versioning middleware ApiVersionMiddleware in app/Http/Middleware/ApiVersionMiddleware.php (§A-5)
-- [ ] T006 [P] Create base exception handling conversion in app/Exceptions/Handler.php (§S-3, §S-4)
-- [ ] T007 [P] Implement custom log channels in config/logging.php (§L-1, §L-4)
-- [ ] T008 [P] Implement RequestLogger middleware in app/Http/Middleware/RequestLogger.php (§L-2)
-- [ ] T009 Create Loggable service trait in app/Services/Traits/Loggable.php (§L-3)
-- [ ] T010 [P] Define BaseApiTestCase helpers or uses bindings in tests/Pest.php (§T-4)
+- [x] T004 Setup Model strict mode `Model::shouldBeStrict()` in app/Providers/AppServiceProvider.php (§C-4)
+- [x] T005 Create base versioning middleware ApiVersionMiddleware in app/Http/Middleware/ApiVersionMiddleware.php (§A-5)
+- [x] T006 [P] Create base exception handling conversion in app/Exceptions/Handler.php (§S-3, §S-4)
+- [x] T007 [P] Implement custom log channels in config/logging.php (§L-1, §L-4)
+- [x] T008 [P] Implement RequestLogger middleware in app/Http/Middleware/RequestLogger.php (§L-2)
+- [x] T009 Create Loggable service trait in app/Services/Traits/Loggable.php (§L-3)
+- [x] T010 [P] Define BaseApiTestCase helpers or uses bindings in tests/Pest.php (§T-4)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -51,7 +51,7 @@
 **Independent Test**: Call `POST /api/v1/auth/register` and `POST /api/v1/auth/login` using Pest HTTP helpers, checking for bearer token format and successful HTTP 201/200 returns.
 
 ### Tests for User Story 5
-- [ ] T011 [P] [US5] Create registration, login, and logout Pest feature tests in tests/Feature/Api/V1/AuthTest.php
+- [x] T011 [P] [US5] Create registration, login, and logout Pest feature tests in tests/Feature/Api/V1/AuthTest.php
 
 ### Implementation for User Story 5
 - [ ] T012 [P] [US5] Add `HasUlids` trait and backed enum status cast to User model in app/Models/User.php (§C-3, §D-3)
