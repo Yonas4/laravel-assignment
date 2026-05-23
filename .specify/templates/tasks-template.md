@@ -21,10 +21,10 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- **Laravel API**: `app/` (Models, Services, Repositories, Data, Enums, Http), `tests/` at repository root
+- **Web app**: `backend/` + `frontend/` at repository root
+- **Mobile**: `api/` + `ios/` or `android/`
+- Paths shown below assume Laravel API — adjust based on plan.md structure
 
 <!--
   ============================================================================
@@ -63,12 +63,14 @@ description: "Task list template for feature implementation"
 
 Examples of foundational tasks (adjust based on your project):
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T004 Setup database schema, ULID-based migrations, and SoftDeletes on all tables (§C-3, §D-1)
+- [ ] T005 [P] Implement Sanctum authentication + `auth:sanctum` middleware (§S-1)
+- [ ] T006 [P] Setup `/api/v1/` routing with `ApiVersionMiddleware` in `routes/api_v1.php` (§A-5)
+- [ ] T007 Create `Loggable` trait, `RequestLogger` middleware, and 3 log channels (§L-1..§L-3)
+- [ ] T008 [P] Configure JSON exception handler for API routes (§S-3, §S-4)
+- [ ] T009 [P] Create `BaseApiTestCase` with typed HTTP helpers (`apiGet`, `apiPost`, etc.) (§T-4)
+- [ ] T010 [P] Setup Repository interface + Eloquent binding pattern in Service Provider (§A-1)
+- [ ] T011 Enable `Model::shouldBeStrict()` in non-production `AppServiceProvider` (§C-4)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -108,15 +110,16 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T018 [P] [US2] Feature test for [endpoint] in tests/Feature/Api/V1/[Name]Test.php
+- [ ] T019 [P] [US2] Service integration test in tests/Feature/Services/[Name]ServiceTest.php
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T021 [US2] Implement [Service] in src/services/[service].py
-- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T020 [P] [US2] Create [Entity] model with ULID + SoftDeletes in app/Models/[Entity].php
+- [ ] T021 [P] [US2] Implement [Entity]Repository interface and Eloquent implementation
+- [ ] T022 [P] [US2] Create DTO [Entity]Data in app/Data/[Entity]Data.php
+- [ ] T023 [US2] Implement [Service] in app/Services/[Service].php using Loggable trait
+- [ ] T024 [US2] Implement [Controller] in app/Http/Controllers/Api/V1/[Controller].php
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -130,14 +133,16 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T025 [P] [US3] Feature test for [endpoint] in tests/Feature/Api/V1/[Name]Test.php
+- [ ] T026 [P] [US3] Service integration test in tests/Feature/Services/[Name]ServiceTest.php
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T027 [US3] Implement [Service] in src/services/[service].py
-- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T027 [P] [US3] Create [Entity] model with ULID + SoftDeletes in app/Models/[Entity].php
+- [ ] T028 [P] [US3] Implement [Entity]Repository interface and Eloquent implementation
+- [ ] T029 [P] [US3] Create DTO [Entity]Data in app/Data/[Entity]Data.php
+- [ ] T030 [US3] Implement [Service] in app/Services/[Service].php using Loggable trait
+- [ ] T031 [US3] Implement [Controller] in app/Http/Controllers/Api/V1/[Controller].php
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -154,8 +159,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
-- [ ] TXXX Security hardening
+- [ ] TXXX [P] Additional Pest tests (if requested) in tests/Unit/
+- [ ] TXXX Security hardening (verify `auth:sanctum`, `.env` secrets, JSON exceptions)
+- [ ] TXXX Constitution compliance audit (all §A, §C, §T, §L, §S, §D gates)
 - [ ] TXXX Run quickstart.md validation
 
 ---

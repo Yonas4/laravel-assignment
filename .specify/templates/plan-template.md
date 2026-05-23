@@ -40,12 +40,43 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [ ] **Repository & Service Pattern**: Does this design strictly separate Controller, Service, and Repository layers?
-- [ ] **API Versioning**: Are all endpoints versioned under `/api/v1/`?
-- [ ] **PHP 8.3 & DTOs**: Does the implementation enforce strict types, use ULIDs, and DTOs via `spatie/laravel-data`?
-- [ ] **Pest Testing**: Are tests exclusively Pest tests with no PHPUnit class syntax?
-- [ ] **Service Logging**: Does every service action implement service-level logging (Loggable trait)?
-- [ ] **Eloquent Separation**: Is there absolutely NO direct Eloquent querying/writing in Controllers or Services?
+**Architecture**
+- [ ] §A-1 Controllers never touch Eloquent directly; all data access goes through Repository interfaces
+- [ ] §A-2 Business logic lives only in Services, never in Controllers/Repositories/migrations/seeders/routes
+- [ ] §A-3 Payment gateways implement `PaymentGatewayInterface` (Strategy Pattern), resolved via container
+- [ ] §A-4 All Service method signatures use `spatie/laravel-data` DTOs — no raw arrays
+- [ ] §A-5 All endpoints versioned under `/api/v1/` with `ApiVersionMiddleware`; controllers in `App\Http\Controllers\Api\V1`
+
+**Code Quality**
+- [ ] §C-1 Every PHP file starts with `declare(strict_types=1);`
+- [ ] §C-2 Domain constants use PHP-backed Enums, not magic strings/integers
+- [ ] §C-3 ULID primary keys on all models — no auto-increment integers
+- [ ] §C-4 `Model::shouldBeStrict()` enabled in non-production
+- [ ] §C-5 No business logic in migrations, seeders, or route files
+
+**Testing**
+- [ ] §T-1 All tests use Pest functional syntax; no PHPUnit class-based tests
+- [ ] §T-2 Every feature has at least one test under `tests/Feature/Api/V1/`
+- [ ] §T-3 Tests use `RefreshDatabase`; no shared mutable state between tests
+- [ ] §T-4 `BaseApiTestCase` provides typed helpers (`apiGet`, `apiPost`, etc.) with `/api/v1/` prefix
+
+**Logging**
+- [ ] §L-1 Three dedicated log channels: `app`, `api_requests`, `payment`
+- [ ] §L-2 `RequestLogger` middleware logs method, url, user_id, status, duration_ms to `api_requests`
+- [ ] §L-3 Every Service uses `Loggable` trait for start/success/failure logging
+- [ ] §L-4 Log retention: payment=90d, api_requests=30d, app=14d
+
+**Security**
+- [ ] §S-1 All protected routes use `auth:sanctum` middleware
+- [ ] §S-2 No credentials in code; all secrets via `.env`
+- [ ] §S-3 Exception handler converts all Throwable to JSON for API routes (no stack traces in production)
+- [ ] §S-4 Validation errors return 422 with structured `errors` key
+
+**Database**
+- [ ] §D-1 Every table has `created_at`, `updated_at`, `deleted_at` (SoftDeletes on all models)
+- [ ] §D-2 Foreign keys explicitly indexed in migrations
+- [ ] §D-3 Enum columns cast to PHP-backed Enums via `$casts`
+- [ ] §D-4 Every `up()` has a matching `down()` — reversible migrations only
 
 ## Project Structure
 

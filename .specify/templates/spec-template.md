@@ -81,7 +81,13 @@
 ## Requirements *(mandatory)*
 
 > [!TIP]
-> **Constitution Guardrails**: When drafting requirements, remember that all new endpoints must be versioned under `/api/v1/`, primary/foreign keys must use ULIDs, all service operations must be logged, and business data flow must use spatie/laravel-data DTOs.
+> **Constitution Guardrails (v2.0.0)**: When drafting requirements, enforce:
+> - **Architecture**: Repository pattern, Service layer, Strategy for payments, DTOs via `spatie/laravel-data`, endpoints under `/api/v1/`
+> - **Code Quality**: `strict_types=1`, PHP Enums (no magic strings), ULID PKs, `Model::shouldBeStrict()`, no logic in migrations/seeders
+> - **Testing**: Pest only, Feature tests in `tests/Feature/Api/V1/`, `RefreshDatabase`, `BaseApiTestCase` helpers
+> - **Logging**: Three channels (`app`/`api_requests`/`payment`), `RequestLogger` middleware, `Loggable` trait on Services
+> - **Security**: `auth:sanctum`, no credentials in code, JSON exception handler, 422 validation with `errors` key
+> - **Database**: Timestamps + SoftDeletes, explicit FK indexes, PHP Enum casts, reversible migrations
 
 <!--
   ACTION REQUIRED: The content in this section represents placeholders.
