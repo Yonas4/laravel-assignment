@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Data\Payment\GatewayQueryData;
+use App\Data\Payment\PaymentInitiateData;
 use App\Http\Controllers\Controller;
 use App\Services\Payment\PaymentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
@@ -21,23 +23,22 @@ class PaymentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'gateways' => $gateways,
-            ],
+            'message' => 'Available payment gateways.',
+            'data' => $gateways,
         ]);
     }
 
-    public function initiate(\App\Data\Payment\PaymentInitiateData $data, \Illuminate\Http\Request $request): JsonResponse
+    public function initiate(PaymentInitiateData $data, Request $request): JsonResponse
     {
         $response = $this->paymentService->initiatePayment($data, (string) $request->user()->id);
 
         return response()->json([
             'success' => true,
             'data' => $response,
-        ]);
+        ], 201);
     }
 
-    public function callback(string $gateway, \Illuminate\Http\Request $request): JsonResponse
+    public function callback(string $gateway, Request $request): JsonResponse
     {
         $this->paymentService->handleCallback($gateway, $request->all());
 
@@ -47,7 +48,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function index(\Illuminate\Http\Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
         $transactions = $this->paymentService->getTransactionsForUser((string) $request->user()->id, $perPage);
@@ -58,17 +59,15 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function show(string $id, \Illuminate\Http\Request $request): JsonResponse
+    public function show(string $id, Request $request): JsonResponse
     {
-        // Actually we should ideally have findForUser in repository but let's just use Eloquent for this simple read
-        // Or inject PaymentTransactionRepository to be strict. I'll just use the model here as a quick read,
-        // Wait, rule A-1: "Controllers never touch Eloquent directly". I must use Repository.
-        // Let's rely on PaymentService or Repository. I will inject Repository via App() or define find method in Service.
-        
-        $transaction = app(\App\Repositories\Contracts\PaymentTransactionRepositoryInterface::class)->find($id);
+        $transaction = $this->paymentService->getTransactionForUser($id, (string) $request->user()->id);
 
-        if (!$transaction || $transaction->user_id !== $request->user()->id) {
-            return response()->json(['success' => false, 'message' => 'Transaction not found.'], 404);
+        if (!$transaction) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction not found.',
+            ], 404);
         }
 
         return response()->json([

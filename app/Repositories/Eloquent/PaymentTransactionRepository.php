@@ -18,10 +18,15 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
     {
         return PaymentTransaction::find($id);
     }
-    
+
     public function findByGatewayTransactionId(string $gatewayTransactionId): ?PaymentTransaction
     {
         return PaymentTransaction::where('gateway_transaction_id', $gatewayTransactionId)->first();
+    }
+
+    public function findByIdempotencyKey(string $idempotencyKey): ?PaymentTransaction
+    {
+        return PaymentTransaction::where('idempotency_key', $idempotencyKey)->first();
     }
 
     public function update(PaymentTransaction $transaction, array $data): bool

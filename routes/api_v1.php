@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -20,14 +21,19 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    // ──────────────────────────────────────────────────────
+    // PAYMENTS
+    // ──────────────────────────────────────────────────────
     Route::prefix('payments')->group(function () {
-        Route::get('/gateways', [\App\Http\Controllers\Api\V1\PaymentController::class, 'gateways']);
-        Route::post('/callback/{gateway}', [\App\Http\Controllers\Api\V1\PaymentController::class, 'callback']);
-        
+        // Public
+        Route::get('/gateways', [PaymentController::class, 'gateways']);
+        Route::post('/callback/{gateway}', [PaymentController::class, 'callback']);
+
+        // Protected
         Route::middleware('auth:sanctum')->group(function () {
-            Route::post('/initiate', [\App\Http\Controllers\Api\V1\PaymentController::class, 'initiate']);
-            Route::get('/transactions', [\App\Http\Controllers\Api\V1\PaymentController::class, 'index']);
-            Route::get('/transactions/{id}', [\App\Http\Controllers\Api\V1\PaymentController::class, 'show']);
+            Route::post('/initiate', [PaymentController::class, 'initiate']);
+            Route::get('/transactions', [PaymentController::class, 'index']);
+            Route::get('/transactions/{id}', [PaymentController::class, 'show']);
         });
     });
 
