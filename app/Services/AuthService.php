@@ -6,11 +6,12 @@ namespace App\Services;
 
 use App\Data\Auth\LoginData;
 use App\Data\Auth\RegisterData;
+use App\Enums\UserStatus;
+use App\Exceptions\ApiException;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\Traits\Loggable;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
@@ -53,9 +54,11 @@ class AuthService
             $user = $this->userRepository->findByEmail($data->email);
 
             if (! $user || ! Hash::check($data->password, $user->password)) {
-                throw ValidationException::withMessages([
-                    'email' => ['Invalid credentials provided.'],
-                ]);
+                throw new ApiException('Invalid credentials provided.', 401);
+            }
+
+            if ($user->status === UserStatus::BANNED) {
+                throw new ApiException('Your account has been banned.', 403);
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;
