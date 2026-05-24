@@ -42,6 +42,14 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    Route::prefix('packages')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\PackageController::class, 'index']);
+        
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::post('/{id}/add-to-cart', [\App\Http\Controllers\Api\V1\PackageController::class, 'addToCart']);
+        });
+    });
+
     Route::prefix('cart')->middleware('auth:sanctum')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\CartController::class, 'index']);
         Route::post('/items', [\App\Http\Controllers\Api\V1\CartController::class, 'store']);
