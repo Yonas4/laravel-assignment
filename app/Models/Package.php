@@ -5,31 +5,34 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'name',
     'description',
-    'price'
+    'price',
+    'currency',
+    'is_active',
 ])]
-class Package extends Model
+class Package extends BaseModel
 {
     /** @use HasFactory<\Database\Factories\PackageFactory> */
-    use HasFactory, HasUlids, SoftDeletes;
+    use HasFactory;
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
+            'is_active' => 'boolean',
         ];
     }
 
     public function services(): BelongsToMany
     {
-        return $this->belongsToMany(Service::class, 'package_service');
+        return $this->belongsToMany(Service::class, 'package_services')
+            ->withPivot('sort_order')
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
     }
 }

@@ -15,9 +15,29 @@ class SubscriptionController extends Controller
         private readonly SubscriptionService $subscriptionService
     ) {}
 
+    public function plans(): JsonResponse
+    {
+        $plans = $this->subscriptionService->getActivePlans();
+
+        return response()->json([
+            'success' => true,
+            'data' => $plans,
+        ]);
+    }
+
     public function trial(Request $request): JsonResponse
     {
         $subscription = $this->subscriptionService->activateTrial((string) $request->user()->id);
+
+        return response()->json([
+            'success' => true,
+            'data' => $subscription,
+        ], 201);
+    }
+
+    public function my(Request $request): JsonResponse
+    {
+        $subscription = $this->subscriptionService->getActiveSubscription((string) $request->user()->id);
 
         return response()->json([
             'success' => true,

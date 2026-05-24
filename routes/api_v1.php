@@ -3,8 +3,12 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\PackageController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -41,23 +45,42 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    // ──────────────────────────────────────────────────────
+    // SUBSCRIPTIONS
+    // ──────────────────────────────────────────────────────
+    // Plans is PUBLIC — declared OUTSIDE auth group
+    Route::get('/subscriptions/plans', [SubscriptionController::class, 'plans']);
+
     Route::prefix('subscriptions')->middleware('auth:sanctum')->group(function () {
-        Route::post('/trial', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'trial']);
+        Route::post('/trial', [SubscriptionController::class, 'trial']);
+        Route::get('/my', [SubscriptionController::class, 'my']);
     });
 
+    // ──────────────────────────────────────────────────────
+    // SERVICES
+    // ──────────────────────────────────────────────────────
     Route::prefix('services')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\V1\ServiceController::class, 'index']);
-        
+        // Public
+        Route::get('/', [ServiceController::class, 'index']);
+        Route::get('/{id}', [ServiceController::class, 'show']);
+
+        // Protected
         Route::middleware('auth:sanctum')->group(function () {
-            Route::post('/{id}/book', [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
+            Route::post('/{id}/book', [BookingController::class, 'store']);
         });
     });
 
+    // ──────────────────────────────────────────────────────
+    // PACKAGES
+    // ──────────────────────────────────────────────────────
     Route::prefix('packages')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\V1\PackageController::class, 'index']);
-        
+        // Public
+        Route::get('/', [PackageController::class, 'index']);
+        Route::get('/{id}', [PackageController::class, 'show']);
+
+        // Protected
         Route::middleware('auth:sanctum')->group(function () {
-            Route::post('/{id}/add-to-cart', [\App\Http\Controllers\Api\V1\PackageController::class, 'addToCart']);
+            Route::post('/{id}/add-to-cart', [PackageController::class, 'addToCart']);
         });
     });
 

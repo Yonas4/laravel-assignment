@@ -38,9 +38,17 @@ class BookingService
 
             // Check service existence and availability
             $service = $this->serviceRepository->findById($serviceId);
-            if (!$service || !$service->is_available) {
+            if (!$service || !$service->is_active) {
                 throw ValidationException::withMessages([
                     'service_id' => ['The selected service is not available.'],
+                ]);
+            }
+
+            // Prevent duplicate bookings: check if user already has pending/confirmed booking for this service
+            $existingBooking = $this->bookingRepository->findActiveForUserAndService($userId, $serviceId);
+            if ($existingBooking) {
+                throw ValidationException::withMessages([
+                    'service_id' => ['You already have an active booking for this service.'],
                 ]);
             }
 

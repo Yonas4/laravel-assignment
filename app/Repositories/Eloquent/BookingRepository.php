@@ -21,4 +21,15 @@ class BookingRepository implements BookingRepositoryInterface
             ->orderBy('scheduled_at', 'desc')
             ->paginate($perPage);
     }
+
+    /**
+     * Find an active (pending or confirmed) booking for a user and service.
+     */
+    public function findActiveForUserAndService(string $userId, string $serviceId): ?Booking
+    {
+        return Booking::where('user_id', $userId)
+            ->where('service_id', $serviceId)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->first();
+    }
 }

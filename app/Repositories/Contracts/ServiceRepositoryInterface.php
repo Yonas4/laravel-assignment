@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface ServiceRepositoryInterface
 {
-    public function allAvailable(): Collection;
+    public function allActive(): Collection;
+
     public function findById(string $id): ?Service;
 }

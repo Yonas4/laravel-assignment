@@ -16,7 +16,28 @@ class ServiceController extends Controller
 
     public function index(): JsonResponse
     {
-        $services = $this->serviceRepository->allAvailable();
-        return response()->json(['data' => $services]);
+        $services = $this->serviceRepository->allActive();
+
+        return response()->json([
+            'success' => true,
+            'data' => $services,
+        ]);
+    }
+
+    public function show(string $id): JsonResponse
+    {
+        $service = $this->serviceRepository->findById($id);
+
+        if (!$service) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Service not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $service,
+        ]);
     }
 }
