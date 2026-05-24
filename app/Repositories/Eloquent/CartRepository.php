@@ -15,8 +15,21 @@ class CartRepository implements CartRepositoryInterface
         return Cart::firstOrCreate(['user_id' => $userId]);
     }
 
-    public function addItem(Cart $cart, array $data): CartItem
+    /**
+     * Add item to cart or increment quantity if already exists.
+     */
+    public function addOrIncrementItem(Cart $cart, array $data): CartItem
     {
+        $existing = $cart->items()
+            ->where('itemable_type', $data['itemable_type'])
+            ->where('itemable_id', $data['itemable_id'])
+            ->first();
+
+        if ($existing) {
+            $existing->increment('quantity', $data['quantity']);
+            return $existing->fresh();
+        }
+
         return $cart->items()->create($data);
     }
 
@@ -32,6 +45,6 @@ class CartRepository implements CartRepositoryInterface
 
     public function findByUserId(string $userId): ?Cart
     {
-        return Cart::with('items.service')->where('user_id', $userId)->first();
+        return Cart::with('items')->where('user_id', $userId)->first();
     }
 }

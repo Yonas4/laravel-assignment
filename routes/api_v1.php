@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -50,10 +51,13 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    // ──────────────────────────────────────────────────────
+    // CART
+    // ──────────────────────────────────────────────────────
     Route::prefix('cart')->middleware('auth:sanctum')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\V1\CartController::class, 'index']);
-        Route::post('/items', [\App\Http\Controllers\Api\V1\CartController::class, 'store']);
-        Route::delete('/items/{id}', [\App\Http\Controllers\Api\V1\CartController::class, 'destroy']);
-        Route::delete('/', [\App\Http\Controllers\Api\V1\CartController::class, 'clear']);
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/items', [CartController::class, 'store']);
+        Route::delete('/items/{id}', [CartController::class, 'destroy']);
+        Route::delete('/', [CartController::class, 'clear']);
     });
 });
