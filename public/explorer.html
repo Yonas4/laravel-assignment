@@ -457,33 +457,35 @@
     let packageIdCache = null;
 
     const endpoints = [
-      { id: 'auth-register', group: 'Auth', method: 'POST', path: '/api/v1/auth/register', auth: false, body: { name: "Yunes Demo", email: "yunes@ajeer.app", password: "password123", password_confirmation: "password123", city: "Riyadh" } },
-      { id: 'auth-login', group: 'Auth', method: 'POST', path: '/api/v1/auth/login', auth: false, body: { email: "demo@ajeer.app", password: "password" } },
-      { id: 'auth-logout', group: 'Auth', method: 'POST', path: '/api/v1/auth/logout', auth: true },
-      { id: 'auth-me', group: 'Auth', method: 'GET', path: '/api/v1/auth/me', auth: true },
+      { id: 'health-check', label: '0. API Health Check', group: '1. Authentication', method: 'GET', path: '/api/v1/health', auth: false },
+      { id: 'auth-register', label: '1. Register User', group: '1. Authentication', method: 'POST', path: '/api/v1/auth/register', auth: false, body: { name: "Yunes Demo", email: "yunes@ajeer.app", password: "password123", password_confirmation: "password123", city: "Riyadh" } },
+      { id: 'auth-login', label: '2. Login User', group: '1. Authentication', method: 'POST', path: '/api/v1/auth/login', auth: false, body: { email: "demo@ajeer.app", password: "password" } },
+      { id: 'auth-me', label: '3. Get Current User (Me)', group: '1. Authentication', method: 'GET', path: '/api/v1/auth/me', auth: true },
       
-      { id: 'pay-gateways', group: 'Payments', method: 'GET', path: '/api/v1/payments/gateways?city=Riyadh&module=booking', auth: false },
-      { id: 'pay-init', group: 'Payments', method: 'POST', path: '/api/v1/payments/initiate', auth: true, body: { gateway: "moyasar", amount: 49.00, currency: "SAR", module: "subscription", city: "Riyadh", idempotency_key: "auto-generated-uuid" }, hasUuidHelper: true },
-      { id: 'pay-call', group: 'Payments', method: 'POST', path: '/api/v1/payments/callback/{gateway}', auth: false, body: { id: "moy_demo_ref_001", status: "paid" } },
-      { id: 'pay-txs', group: 'Payments', method: 'GET', path: '/api/v1/payments/transactions', auth: true },
-      { id: 'pay-tx-id', group: 'Payments', method: 'GET', path: '/api/v1/payments/transactions/{id}', auth: true },
+      { id: 'sub-plans', label: '4. List Subscription Plans', group: '2. Subscriptions', method: 'GET', path: '/api/v1/subscriptions/plans', auth: false },
+      { id: 'sub-trial', label: '5. Activate Free Trial', group: '2. Subscriptions', method: 'POST', path: '/api/v1/subscriptions/trial', auth: true },
+      { id: 'sub-my', label: '6. My Current Subscription', group: '2. Subscriptions', method: 'GET', path: '/api/v1/subscriptions/my', auth: true },
 
-      { id: 'sub-plans', group: 'Subscriptions', method: 'GET', path: '/api/v1/subscriptions/plans', auth: false },
-      { id: 'sub-trial', group: 'Subscriptions', method: 'POST', path: '/api/v1/subscriptions/trial', auth: true },
-      { id: 'sub-my', group: 'Subscriptions', method: 'GET', path: '/api/v1/subscriptions/my', auth: true },
+      { id: 'svc-all', label: '7. List All Services', group: '3. Services & Booking', method: 'GET', path: '/api/v1/services', auth: false },
+      { id: 'svc-id', label: '8. Get Single Service Details', group: '3. Services & Booking', method: 'GET', path: '/api/v1/services/{id}', auth: false },
+      { id: 'svc-book', label: '9. Book a Service (Active Sub Required)', group: '3. Services & Booking', method: 'POST', path: '/api/v1/services/{id}/book', auth: true, body: { scheduled_at: "<tomorrow ISO>", notes: "Please call before arriving" }, hasDateHelper: true },
 
-      { id: 'svc-all', group: 'Services', method: 'GET', path: '/api/v1/services', auth: false },
-      { id: 'svc-id', group: 'Services', method: 'GET', path: '/api/v1/services/{id}', auth: false },
-      { id: 'svc-book', group: 'Services', method: 'POST', path: '/api/v1/services/{id}/book', auth: true, body: { scheduled_at: "<tomorrow ISO>", notes: "Please call before arriving" }, hasDateHelper: true },
+      { id: 'pkg-all', label: '10. List All Packages', group: '4. Packages & Cart', method: 'GET', path: '/api/v1/packages', auth: false },
+      { id: 'pkg-id', label: '11. Get Single Package Details', group: '4. Packages & Cart', method: 'GET', path: '/api/v1/packages/{id}', auth: false },
+      { id: 'pkg-add', label: '12. Add Package to Cart via Endpoint', group: '4. Packages & Cart', method: 'POST', path: '/api/v1/packages/{id}/add-to-cart', auth: true, body: { quantity: 1 } },
+      
+      { id: 'cart-get', label: '13. View Cart', group: '4. Packages & Cart', method: 'GET', path: '/api/v1/cart', auth: true },
+      { id: 'cart-add', label: '14. Add Any Item to Cart', group: '4. Packages & Cart', method: 'POST', path: '/api/v1/cart/items', auth: true, body: { item_id: "<service-id>", item_type: "service", quantity: 1 } },
+      { id: 'cart-del-item', label: '15. Delete Single Item from Cart', group: '4. Packages & Cart', method: 'DELETE', path: '/api/v1/cart/items/{cartItemId}', auth: true },
+      { id: 'cart-del-all', label: '16. Clear Entire Cart', group: '4. Packages & Cart', method: 'DELETE', path: '/api/v1/cart', auth: true },
 
-      { id: 'pkg-all', group: 'Packages', method: 'GET', path: '/api/v1/packages', auth: false },
-      { id: 'pkg-id', group: 'Packages', method: 'GET', path: '/api/v1/packages/{id}', auth: false },
-      { id: 'pkg-add', group: 'Packages', method: 'POST', path: '/api/v1/packages/{id}/add-to-cart', auth: true, body: { quantity: 1 } },
-
-      { id: 'cart-get', group: 'Cart', method: 'GET', path: '/api/v1/cart', auth: true },
-      { id: 'cart-add', group: 'Cart', method: 'POST', path: '/api/v1/cart/items', auth: true, body: { item_id: "<service-id>", item_type: "service", quantity: 1 } },
-      { id: 'cart-del-item', group: 'Cart', method: 'DELETE', path: '/api/v1/cart/items/{cartItemId}', auth: true },
-      { id: 'cart-del-all', group: 'Cart', method: 'DELETE', path: '/api/v1/cart', auth: true }
+      { id: 'pay-gateways', label: '17. List Available Payment Gateways', group: '5. Payments & Transactions', method: 'GET', path: '/api/v1/payments/gateways?city=Riyadh&module=booking', auth: false },
+      { id: 'pay-init', label: '18. Initiate Payment (Generates Transaction)', group: '5. Payments & Transactions', method: 'POST', path: '/api/v1/payments/initiate', auth: true, body: { gateway: "moyasar", amount: 49.00, currency: "SAR", module: "subscription", city: "Riyadh", idempotency_key: "auto-generated-uuid" }, hasUuidHelper: true },
+      { id: 'pay-call', label: '19. Simulate Payment Gateway Callback', group: '5. Payments & Transactions', method: 'POST', path: '/api/v1/payments/callback/{gateway}', auth: false, body: { id: "moy_demo_ref_001", status: "paid" } },
+      { id: 'pay-txs', label: '20. List My Transactions', group: '5. Payments & Transactions', method: 'GET', path: '/api/v1/payments/transactions', auth: true },
+      { id: 'pay-tx-id', label: '21. Get Single Transaction Details', group: '5. Payments & Transactions', method: 'GET', path: '/api/v1/payments/transactions/{id}', auth: true },
+      
+      { id: 'auth-logout', label: '22. Logout User (Invalidates Token)', group: '1. Authentication', method: 'POST', path: '/api/v1/auth/logout', auth: true }
     ];
 
     const scenarios = [
@@ -499,7 +501,8 @@
       renderSidebar();
       renderCards();
       renderScenarios();
-      showSection('group-Auth');
+      const firstGroup = [...new Set(endpoints.map(e => e.group))][0];
+      showSection('group-' + firstGroup.replace(/[^a-zA-Z0-9]/g, '_'));
     }
 
     function setToken(token) {
@@ -605,13 +608,12 @@
         groupItems.forEach(ep => {
           const itemEl = document.createElement('a');
           itemEl.className = 'nav-item';
-          const shortPath = ep.path.split('/').pop() || 'index';
-          itemEl.textContent = shortPath;
+          itemEl.textContent = ep.label;
           itemEl.onclick = (e) => {
             e.preventDefault();
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             itemEl.classList.add('active');
-            showSection(`group-${group}`);
+            showSection('group-' + group.replace(/[^a-zA-Z0-9]/g, '_'));
             document.getElementById(`card-${ep.id}`).scrollIntoView({ behavior: 'smooth' });
           };
           itemsEl.appendChild(itemEl);
@@ -629,7 +631,7 @@
       groups.forEach(group => {
         const section = document.createElement('div');
         section.className = 'section';
-        section.id = `section-group-${group}`;
+        section.id = 'section-group-' + group.replace(/[^a-zA-Z0-9]/g, '_');
         
         const groupItems = endpoints.filter(e => e.group === group);
         groupItems.forEach(ep => {
@@ -653,40 +655,39 @@
         helpersHtml += `<button class="helper-btn" onclick="fillUuidHelper('${ep.id}')">[Generate UUID]</button>`;
       }
 
+      const hasBody = ep.body || ep.method !== 'GET';
+
       card.innerHTML = `
-        <div class="card-header">
-          <div class="method-badge method-${ep.method}">${ep.method}</div>
-          <input type="text" class="url-input" id="url-${ep.id}" value="${ep.path}">
-          <button class="btn" id="btn-${ep.id}" onclick="executeCard('${ep.id}', '${ep.method}', ${ep.auth})">
-            <span class="spinner"></span>
-            RUN
-          </button>
-        </div>
-        <div class="card-body" style="${!ep.body && ep.method === 'GET' ? 'display:none;' : ''}">
-          <div class="card-editor">
-            <div class="label">
-              <span>Request Body (JSON)</span>
-              <div class="helpers">${helpersHtml}</div>
-            </div>
-            <textarea id="body-${ep.id}">${ep.body ? JSON.stringify(ep.body, null, 2) : ''}</textarea>
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.5rem; justify-content: flex-start; align-items: center;">
+          <div style="font-weight: 700; color: var(--text-primary); margin-right: auto; font-size: 0.95rem; font-family: var(--font-sans);">
+            ${ep.label}
           </div>
-          <div class="card-response">
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <div class="method-badge method-${ep.method}">${ep.method}</div>
+            <input type="text" class="url-input" id="url-${ep.id}" value="${ep.path}" style="width: 320px;">
+            <button class="btn" id="btn-${ep.id}" onclick="executeCard('${ep.id}', '${ep.method}', ${ep.auth})">
+              <span class="spinner"></span>
+              RUN
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          ${hasBody ? `
+            <div class="card-editor">
+              <div class="label">
+                <span>Request Body (JSON)</span>
+                <div class="helpers">${helpersHtml}</div>
+              </div>
+              <textarea id="body-${ep.id}">${ep.body ? JSON.stringify(ep.body, null, 2) : ''}</textarea>
+            </div>
+          ` : ''}
+          <div class="card-response" style="${!hasBody ? 'border-left: none; padding-left: 0;' : ''}">
             <div class="label">Response</div>
             <div id="resp-status-${ep.id}" class="status-bar">
               <span class="status-pill status-0">---</span>
               <span>Waiting...</span>
             </div>
             <div class="response-viewer" id="resp-body-${ep.id}"></div>
-          </div>
-        </div>
-        <div class="card-body" id="get-response-panel-${ep.id}" style="${ep.body || ep.method !== 'GET' ? 'display:none;' : ''}">
-           <div class="card-response" style="border:none">
-            <div class="label">Response</div>
-            <div id="resp-status-get-${ep.id}" class="status-bar">
-              <span class="status-pill status-0">---</span>
-              <span>Waiting...</span>
-            </div>
-            <div class="response-viewer" id="resp-body-get-${ep.id}"></div>
           </div>
         </div>
       `;
@@ -707,11 +708,11 @@
 
       const path = document.getElementById(`url-${id}`).value;
       let body = null;
-      if (document.getElementById(`body-${id}`)) {
-        const bodyText = document.getElementById(`body-${id}`).value;
+      const bodyEl = document.getElementById(`body-${id}`);
+      if (bodyEl) {
+        const bodyText = bodyEl.value;
         if (bodyText.trim()) {
           try {
-             // We allow unparsed string for body if it's malformed to test 400s
              JSON.parse(bodyText); 
              body = bodyText;
           } catch(e) {
@@ -722,12 +723,8 @@
 
       const result = await runRequest(method, path, body, auth);
       
-      const isGetOnly = method === 'GET' && !document.getElementById(`body-${id}`);
-      const statusPrefix = isGetOnly ? 'resp-status-get' : 'resp-status';
-      const bodyPrefix = isGetOnly ? 'resp-body-get' : 'resp-body';
-      
-      const statusBar = document.getElementById(`${statusPrefix}-${id}`);
-      const bodyView = document.getElementById(`${bodyPrefix}-${id}`);
+      const statusBar = document.getElementById(`resp-status-${id}`);
+      const bodyView = document.getElementById(`resp-body-${id}`);
       
       if (statusBar && bodyView) {
         statusBar.innerHTML = `
@@ -933,17 +930,17 @@
       
       log(id, `1. GET /payments/gateways?city=Riyadh&module=booking`);
       const r1 = await runRequest('GET', '/api/v1/payments/gateways?city=Riyadh&module=booking', null, false);
-      const gw1 = r1.data?.data?.map(g => g.identifier) || [];
+      const gw1 = r1.data?.data?.map(g => g.key) || [];
       if (!gw1.includes('tap')) { log(id, `FAIL: Tap missing in Riyadh booking. Got: ${gw1}`); return false; }
       
       log(id, `2. GET /payments/gateways?city=Medina&module=booking`);
       const r2 = await runRequest('GET', '/api/v1/payments/gateways?city=Medina&module=booking', null, false);
-      const gw2 = r2.data?.data?.map(g => g.identifier) || [];
+      const gw2 = r2.data?.data?.map(g => g.key) || [];
       if (gw2.includes('tap')) { log(id, `FAIL: Tap should not be in Medina booking`); return false; }
       
       log(id, `3. GET /payments/gateways?city=Riyadh&module=subscription`);
       const r3 = await runRequest('GET', '/api/v1/payments/gateways?city=Riyadh&module=subscription', null, false);
-      const gw3 = r3.data?.data?.map(g => g.identifier) || [];
+      const gw3 = r3.data?.data?.map(g => g.key) || [];
       if (!gw3.includes('stripe') || gw3.includes('tap')) { log(id, `FAIL: Expected Stripe, no Tap in Riyadh sub. Got: ${gw3}`); return false; }
       
       log(id, `SUCCESS: All gateway filters applied correctly.`);
