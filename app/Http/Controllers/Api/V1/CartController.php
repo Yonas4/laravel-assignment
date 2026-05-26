@@ -21,7 +21,7 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $cart,
+            'data'    => $this->formatCart($cart),
         ]);
     }
 
@@ -31,7 +31,7 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $cart,
+            'data'    => $this->formatCart($cart),
         ], 201);
     }
 
@@ -53,5 +53,26 @@ class CartController extends Controller
             'success' => true,
             'message' => 'Cart cleared.',
         ]);
+    }
+
+    /**
+     * Format a cart with computed totals for the response.
+     *
+     * @param  \App\Models\Cart  $cart
+     * @return array<string, mixed>
+     */
+    private function formatCart(\App\Models\Cart $cart): array
+    {
+        $items = $cart->items ?? collect();
+
+        return [
+            'id'          => $cart->id,
+            'user_id'     => $cart->user_id,
+            'items'       => $items->values(),
+            'total_items' => (int) $items->sum('quantity'),
+            'total'       => (float) $items->sum(fn ($i) => $i->unit_price * $i->quantity),
+            'created_at'  => $cart->created_at,
+            'updated_at'  => $cart->updated_at,
+        ];
     }
 }
