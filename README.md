@@ -569,5 +569,3 @@ php artisan test --coverage # With coverage report
 | Polymorphic cart (Service + Package) | ✅ Complete | 3 |
 
 ---
-
-*Assessment submission for Ajeer — a.alsuhaibi@ajeer.app*
