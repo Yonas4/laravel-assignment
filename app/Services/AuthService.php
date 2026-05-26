@@ -27,9 +27,11 @@ class AuthService
 
         try {
             $user = $this->userRepository->create([
-                'name' => $data->name,
-                'email' => $data->email,
+                'name'     => $data->name,
+                'email'    => $data->email,
                 'password' => Hash::make($data->password),
+                'city'     => $data->city,
+                'status'   => UserStatus::ACTIVE->value,
             ]);
 
             $token = $user->createToken('auth_token')->plainTextToken;
