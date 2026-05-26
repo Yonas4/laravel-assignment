@@ -64,6 +64,22 @@ php artisan serve
 **Demo credentials:** `demo@ajeer.app` / `password`
 **API Explorer:** `http://localhost:8000/explorer.html`
 
+### Ajeer API Explorer & User Journey
+
+To visually explore, run, and verify the entire API suite without external tools like Postman, we have built a beautiful, premium **Ajeer API Explorer** accessible locally at `http://localhost:8000/explorer.html`.
+
+#### Key Highlights & Improvements:
+1. **API Health & Diagnostic Checks**: Added `/api/v1/health` as step `0` to instantly verify connectivity.
+2. **Logical Sequential Numbering (1 - 22)**: All 22 endpoints are grouped and ordered chronologically to follow a complete customer journey:
+   - **1. Authentication**: Register (`/auth/register`), Login (`/auth/login`), Profile (`/auth/me`).
+   - **2. Subscriptions**: List Plans (`/subscriptions/plans`), Activate Free Trial (`/subscriptions/trial`), Status (`/subscriptions/my`).
+   - **3. Services & Booking**: List Services (`/services`), View Details (`/services/{id}`), Book Service (`/services/{id}/book`).
+   - **4. Packages & Cart**: List Packages (`/packages`), View Details (`/packages/{id}`), Add via custom endpoint (`/packages/{id}/add-to-cart`), View Cart (`/cart`), Add generic item (`/cart/items`), Delete single item (`/cart/items/{id}`), Clear Cart (`/cart`).
+   - **5. Payments & Transactions**: Gateways (`/payments/gateways`), Initiate (`/payments/initiate`), Simulate Callback (`/payments/callback/{gateway}`), List Transactions (`/payments/transactions`), View Details (`/payments/transactions/{id}`).
+   - **Logout**: Logout (`/auth/logout`) to gracefully invalidate sessions.
+3. **Response Panel Fixes**: Standardized layouts so GET and POST requests cleanly display formatted responses, response headers, performance times, and syntax-highlighted JSON.
+4. **Interactive Scenarios**: Fully-automated quick test scenarios (Idempotency checks, Cart flows, Free trial limits, Gateway city filters) executable directly in-browser.
+
 ---
 
 ## Architecture Overview
@@ -553,5 +569,3 @@ php artisan test --coverage # With coverage report
 | Polymorphic cart (Service + Package) | ✅ Complete | 3 |
 
 ---
-
-*Assessment submission for Ajeer — a.alsuhaibi@ajeer.app*

@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajeer API Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0A0A0F;
+      --panel-surface: #111118;
+      --border-color: #1E1E2E;
+      --accent-primary: #00D4AA;
+      --accent-danger: #FF4560;
+      --accent-warning: #FFB547;
+      --accent-muted: #3D3D52;
+      --accent-post: #3399FF;
+      --text-primary: #E8E8F0;
+      --text-secondary: #7070A0;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background-color: var(--panel-surface);
+      border-bottom: 1px solid var(--border-color);
+      height: 70px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent-primary);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    input[type="text"] {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      outline: none;
+      width: 280px;
+    }
+    input[type="text"]:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .token-pill {
+      background: rgba(0, 212, 170, 0.1);
+      color: var(--accent-primary);
+      border: 1px solid rgba(0, 212, 170, 0.2);
+      padding: 0.4rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .token-pill.empty {
+      background: rgba(112, 112, 160, 0.1);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    sidebar {
+      width: 260px;
+      background-color: var(--panel-surface);
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-group {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-group-title {
+      padding: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      user-select: none;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .nav-group-title:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .nav-items {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-item {
+      padding: 0.6rem 1rem 0.6rem 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(0, 212, 170, 0.05);
+      color: var(--accent-primary);
+      border-right: 2px solid var(--accent-primary);
+    }
+
+    .scenarios-nav {
+      padding: 1rem;
+      background: rgba(255, 181, 71, 0.05);
+      color: var(--accent-warning);
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .scenarios-nav:hover {
+      background: rgba(255, 181, 71, 0.1);
+    }
+
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .section {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .section.active {
+      display: flex;
+    }
+
+    .card {
+      background: var(--panel-surface);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      gap: 1rem;
+    }
+
+    .method-badge {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.3rem 0.6rem;
+    }
+    .method-GET { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
+    .method-POST { color: var(--accent-post); background: rgba(51, 153, 255, 0.1); }
+    .method-DELETE { color: var(--accent-danger); background: rgba(255, 69, 96, 0.1); }
+
+    .url-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .btn {
+      background: var(--accent-primary);
+      color: var(--bg-dark);
+      border: none;
+      padding: 0.5rem 1.5rem;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--accent-muted);
+      color: var(--text-primary);
+    }
+    .btn-danger {
+      background: rgba(255, 69, 96, 0.1);
+      color: var(--accent-danger);
+      border: 1px solid var(--accent-danger);
+    }
+
+    .card-body {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-editor, .card-response {
+      flex: 1;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+    .card-editor {
+      border-right: 1px solid var(--border-color);
+    }
+
+    .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      padding: 1rem;
+      font-size: 0.85rem;
+      resize: vertical;
+      outline: none;
+    }
+    textarea:focus { border-color: var(--accent-muted); }
+
+    .response-viewer {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      height: 200px;
+      overflow: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      white-space: pre;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .status-pill {
+      padding: 0.2rem 0.5rem;
+      color: var(--bg-dark);
+      font-weight: 700;
+    }
+    .status-2xx { background: var(--accent-primary); }
+    .status-3xx { background: var(--accent-warning); }
+    .status-4xx { background: var(--accent-danger); }
+    .status-5xx { background: var(--accent-danger); }
+    .status-0 { background: var(--accent-muted); color: var(--text-primary); }
+
+    .json-key { color: #82AAFF; }
+    .json-string { color: #C3E88D; }
+    .json-bool { color: #FF9CAC; }
+    .json-null { color: #FF9CAC; }
+    .json-number { color: #F78C6C; }
+
+    /* Helpers */
+    .helpers {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .helper-btn {
+      background: transparent;
+      border: 1px solid var(--accent-muted);
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .helper-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-primary);
+    }
+
+    /* Scenarios */
+    .scenario-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      margin-bottom: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .scenario-result {
+      font-weight: 700;
+    }
+    .scenario-log {
+      margin-top: 0.5rem;
+      padding: 1rem;
+      background: #000;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      display: none;
+      white-space: pre-wrap;
+    }
+    .scenario-log.active { display: block; }
+    .scenarios-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .btn.loading .spinner { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Ajeer API Explorer</h1>
+    <div class="header-controls">
+      <input type="text" id="base-url" value="http://localhost:8000">
+      <div id="token-display" class="token-pill empty">No token</div>
+    </div>
+  </header>
+
+  <main>
+    <sidebar id="sidebar">
+      <div class="scenarios-nav" onclick="showSection('scenarios')">
+        ⚡ Quick Scenarios
+      </div>
+      <!-- Groups rendered by JS -->
+    </sidebar>
+
+    <div class="content-area" id="content-area">
+      <!-- Endpoint cards rendered by JS -->
+      
+      <!-- Scenarios Section -->
+      <div class="section" id="section-scenarios">
+        <div class="scenarios-header">
+          <h2>Automated Scenarios</h2>
+          <div style="display:flex; gap: 1rem;">
+            <button class="btn btn-danger" onclick="clearToken()">Clear Token</button>
+            <button class="btn" id="run-all-btn" onclick="runAllScenarios()">
+              <span class="spinner" id="run-all-spinner"></span>
+              ▶ Run All Checks
+            </button>
+          </div>
+        </div>
+        
+        <div id="scenarios-list">
+          <!-- Scenario rows rendered by JS -->
+        </div>
+        
+        <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+          <h3 style="margin-bottom: 1rem; font-family: var(--font-mono); font-size: 0.9rem;">Summary Table</h3>
+          <div id="summary-table" style="font-family: var(--font-mono); font-size: 0.85rem; background: var(--panel-surface); border: 1px solid var(--border-color); padding: 1rem;">
+            <div style="display:flex; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.5rem; color: var(--text-secondary);">
+              <div style="flex:1">Scenario</div>
+              <div style="width:100px; text-align:right">Result</div>
+            </div>
+            <div id="summary-rows">
+              <div style="color: var(--text-secondary); text-align: center; padding: 1rem;">Run scenarios to see results</div>
+            </div>
+            <div id="summary-footer" style="border-top: 1px solid var(--border-color); padding-top: 0.5rem; margin-top: 0.5rem; text-align: right; color: var(--text-secondary);">
+              --/5 PASSED
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // State
+    let authToken = null;
+    let serviceIdCache = null;
+    let packageIdCache = null;
+
+    const endpoints = [
+      { id: 'health-check', label: '0. API Health Check', group: '1. Authentication', method: 'GET', path: '/api/v1/health', auth: false },
+      { id: 'auth-register', label: '1. Register User', group: '1. Authentication', method: 'POST', path: '/api/v1/auth/register', auth: false, body: { name: "Yunes Demo", email: "yunes@ajeer.app", password: "password123", password_confirmation: "password123", city: "Riyadh" } },
+      { id: 'auth-login', label: '2. Login User', group: '1. Authentication', method: 'POST', path: '/api/v1/auth/login', auth: false, body: { email: "demo@ajeer.app", password: "password" } },
+      { id: 'auth-me', label: '3. Get Current User (Me)', group: '1. Authentication', method: 'GET', path: '/api/v1/auth/me', auth: true },
+      
+      { id: 'sub-plans', label: '4. List Subscription Plans', group: '2. Subscriptions', method: 'GET', path: '/api/v1/subscriptions/plans', auth: false },
+      { id: 'sub-trial', label: '5. Activate Free Trial', group: '2. Subscriptions', method: 'POST', path: '/api/v1/subscriptions/trial', auth: true },
+      { id: 'sub-my', label: '6. My Current Subscription', group: '2. Subscriptions', method: 'GET', path: '/api/v1/subscriptions/my', auth: true },
+
+      { id: 'svc-all', label: '7. List All Services', group: '3. Services & Booking', method: 'GET', path: '/api/v1/services', auth: false },
+      { id: 'svc-id', label: '8. Get Single Service Details', group: '3. Services & Booking', method: 'GET', path: '/api/v1/services/{id}', auth: false },
+      { id: 'svc-book', label: '9. Book a Service (Active Sub Required)', group: '3. Services & Booking', method: 'POST', path: '/api/v1/services/{id}/book', auth: true, body: { scheduled_at: "<tomorrow ISO>", notes: "Please call before arriving" }, hasDateHelper: true },
+
+      { id: 'pkg-all', label: '10. List All Packages', group: '4. Packages & Cart', method: 'GET', path: '/api/v1/packages', auth: false },
+      { id: 'pkg-id', label: '11. Get Single Package Details', group: '4. Packages & Cart', method: 'GET', path: '/api/v1/packages/{id}', auth: false },
+      { id: 'pkg-add', label: '12. Add Package to Cart via Endpoint', group: '4. Packages & Cart', method: 'POST', path: '/api/v1/packages/{id}/add-to-cart', auth: true, body: { quantity: 1 } },
+      
+      { id: 'cart-get', label: '13. View Cart', group: '4. Packages & Cart', method: 'GET', path: '/api/v1/cart', auth: true },
+      { id: 'cart-add', label: '14. Add Any Item to Cart', group: '4. Packages & Cart', method: 'POST', path: '/api/v1/cart/items', auth: true, body: { item_id: "<service-id>", item_type: "service", quantity: 1 } },
+      { id: 'cart-del-item', label: '15. Delete Single Item from Cart', group: '4. Packages & Cart', method: 'DELETE', path: '/api/v1/cart/items/{cartItemId}', auth: true },
+      { id: 'cart-del-all', label: '16. Clear Entire Cart', group: '4. Packages & Cart', method: 'DELETE', path: '/api/v1/cart', auth: true },
+
+      { id: 'pay-gateways', label: '17. List Available Payment Gateways', group: '5. Payments & Transactions', method: 'GET', path: '/api/v1/payments/gateways?city=Riyadh&module=booking', auth: false },
+      { id: 'pay-init', label: '18. Initiate Payment (Generates Transaction)', group: '5. Payments & Transactions', method: 'POST', path: '/api/v1/payments/initiate', auth: true, body: { gateway: "moyasar", amount: 49.00, currency: "SAR", module: "subscription", city: "Riyadh", idempotency_key: "auto-generated-uuid" }, hasUuidHelper: true },
+      { id: 'pay-call', label: '19. Simulate Payment Gateway Callback', group: '5. Payments & Transactions', method: 'POST', path: '/api/v1/payments/callback/{gateway}', auth: false, body: { id: "moy_demo_ref_001", status: "paid" } },
+      { id: 'pay-txs', label: '20. List My Transactions', group: '5. Payments & Transactions', method: 'GET', path: '/api/v1/payments/transactions', auth: true },
+      { id: 'pay-tx-id', label: '21. Get Single Transaction Details', group: '5. Payments & Transactions', method: 'GET', path: '/api/v1/payments/transactions/{id}', auth: true },
+      
+      { id: 'auth-logout', label: '22. Logout User (Invalidates Token)', group: '1. Authentication', method: 'POST', path: '/api/v1/auth/logout', auth: true }
+    ];
+
+    const scenarios = [
+      { id: 1, title: '1. Full Auth Flow', fn: runScenario1 },
+      { id: 2, title: '2. Trial Subscription Once Only', fn: runScenario2 },
+      { id: 3, title: '3. Gateway City Filter', fn: runScenario3 },
+      { id: 4, title: '4. Idempotency Check', fn: runScenario4 },
+      { id: 5, title: '5. Cart Flow', fn: runScenario5 }
+    ];
+
+    // Initialization
+    function init() {
+      renderSidebar();
+      renderCards();
+      renderScenarios();
+      const firstGroup = [...new Set(endpoints.map(e => e.group))][0];
+      showSection('group-' + firstGroup.replace(/[^a-zA-Z0-9]/g, '_'));
+    }
+
+    function setToken(token) {
+      authToken = token;
+      const el = document.getElementById('token-display');
+      if (token) {
+        el.textContent = token.substring(0, 20) + '...';
+        el.className = 'token-pill';
+      } else {
+        el.textContent = 'No token';
+        el.className = 'token-pill empty';
+      }
+    }
+
+    function clearToken() {
+      setToken(null);
+    }
+
+    function buildHeaders(requiresAuth) {
+      const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+      if (requiresAuth && authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      return headers;
+    }
+
+    async function runRequest(method, path, body, requiresAuth) {
+      const start = performance.now();
+      const baseUrl = document.getElementById('base-url').value;
+      const url = baseUrl + path;
+
+      const options = {
+        method,
+        headers: buildHeaders(requiresAuth),
+      };
+
+      if (body && method !== 'GET') {
+        options.body = typeof body === 'string' ? body : JSON.stringify(body);
+      }
+
+      try {
+        const response = await fetch(url, options);
+        const duration = Math.round(performance.now() - start);
+        const data = await response.json().catch(() => null);
+        
+        return { status: response.status, duration, data, ok: response.ok };
+      } catch (err) {
+        return { status: 0, duration: 0, data: { error: err.message }, ok: false };
+      }
+    }
+
+    function highlight(json) {
+      if (!json) return '';
+      const str = JSON.stringify(json, null, 2);
+      return str
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/("[\w-]+")\s*:/g, '<span class="json-key">$1</span>:')
+        .replace(/:\s*(".*?")/g, ': <span class="json-string">$1</span>')
+        .replace(/:\s*(true|false)/g, ': <span class="json-bool">$1</span>')
+        .replace(/:\s*(null)/g, ': <span class="json-null">$1</span>')
+        .replace(/:\s*(-?\d+\.?\d*)/g, ': <span class="json-number">$1</span>');
+    }
+
+    function getStatusClass(status) {
+      if (status >= 200 && status < 300) return 'status-2xx';
+      if (status >= 300 && status < 400) return 'status-3xx';
+      if (status >= 400 && status < 500) return 'status-4xx';
+      if (status >= 500) return 'status-5xx';
+      return 'status-0';
+    }
+
+    function getStatusLabel(status) {
+      if (status >= 200 && status < 300) return 'OK';
+      if (status >= 300 && status < 400) return 'REDIRECT';
+      if (status >= 400 && status < 500) return 'ERROR';
+      if (status >= 500) return 'SERVER ERROR';
+      return 'NETWORK ERROR';
+    }
+
+    // UI Rendering
+    function renderSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const groups = [...new Set(endpoints.map(e => e.group))];
+      
+      groups.forEach(group => {
+        const groupItems = endpoints.filter(e => e.group === group);
+        
+        const groupEl = document.createElement('div');
+        groupEl.className = 'nav-group';
+        
+        const titleEl = document.createElement('div');
+        titleEl.className = 'nav-group-title';
+        titleEl.innerHTML = `<span>▼ ${group}</span>`;
+        titleEl.onclick = () => {
+          const itemsContainer = groupEl.querySelector('.nav-items');
+          itemsContainer.style.display = itemsContainer.style.display === 'none' ? 'flex' : 'none';
+        };
+        groupEl.appendChild(titleEl);
+        
+        const itemsEl = document.createElement('div');
+        itemsEl.className = 'nav-items';
+        
+        groupItems.forEach(ep => {
+          const itemEl = document.createElement('a');
+          itemEl.className = 'nav-item';
+          itemEl.textContent = ep.label;
+          itemEl.onclick = (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            itemEl.classList.add('active');
+            showSection('group-' + group.replace(/[^a-zA-Z0-9]/g, '_'));
+            document.getElementById(`card-${ep.id}`).scrollIntoView({ behavior: 'smooth' });
+          };
+          itemsEl.appendChild(itemEl);
+        });
+        
+        groupEl.appendChild(itemsEl);
+        sidebar.appendChild(groupEl);
+      });
+    }
+
+    function renderCards() {
+      const container = document.getElementById('content-area');
+      const groups = [...new Set(endpoints.map(e => e.group))];
+
+      groups.forEach(group => {
+        const section = document.createElement('div');
+        section.className = 'section';
+        section.id = 'section-group-' + group.replace(/[^a-zA-Z0-9]/g, '_');
+        
+        const groupItems = endpoints.filter(e => e.group === group);
+        groupItems.forEach(ep => {
+          section.appendChild(createCard(ep));
+        });
+        
+        container.insertBefore(section, document.getElementById('section-scenarios'));
+      });
+    }
+
+    function createCard(ep) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = `card-${ep.id}`;
+      
+      let helpersHtml = '';
+      if (ep.hasDateHelper) {
+        helpersHtml += `<button class="helper-btn" onclick="fillDateHelper('${ep.id}')">[Today + 3 days]</button>`;
+      }
+      if (ep.hasUuidHelper) {
+        helpersHtml += `<button class="helper-btn" onclick="fillUuidHelper('${ep.id}')">[Generate UUID]</button>`;
+      }
+
+      const hasBody = ep.body || ep.method !== 'GET';
+
+      card.innerHTML = `
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.5rem; justify-content: flex-start; align-items: center;">
+          <div style="font-weight: 700; color: var(--text-primary); margin-right: auto; font-size: 0.95rem; font-family: var(--font-sans);">
+            ${ep.label}
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <div class="method-badge method-${ep.method}">${ep.method}</div>
+            <input type="text" class="url-input" id="url-${ep.id}" value="${ep.path}" style="width: 320px;">
+            <button class="btn" id="btn-${ep.id}" onclick="executeCard('${ep.id}', '${ep.method}', ${ep.auth})">
+              <span class="spinner"></span>
+              RUN
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          ${hasBody ? `
+            <div class="card-editor">
+              <div class="label">
+                <span>Request Body (JSON)</span>
+                <div class="helpers">${helpersHtml}</div>
+              </div>
+              <textarea id="body-${ep.id}">${ep.body ? JSON.stringify(ep.body, null, 2) : ''}</textarea>
+            </div>
+          ` : ''}
+          <div class="card-response" style="${!hasBody ? 'border-left: none; padding-left: 0;' : ''}">
+            <div class="label">Response</div>
+            <div id="resp-status-${ep.id}" class="status-bar">
+              <span class="status-pill status-0">---</span>
+              <span>Waiting...</span>
+            </div>
+            <div class="response-viewer" id="resp-body-${ep.id}"></div>
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      const sec = document.getElementById(`section-${sectionId}`);
+      if (sec) sec.classList.add('active');
+    }
+
+    // Interaction handlers
+    async function executeCard(id, method, auth) {
+      const btn = document.getElementById(`btn-${id}`);
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const path = document.getElementById(`url-${id}`).value;
+      let body = null;
+      const bodyEl = document.getElementById(`body-${id}`);
+      if (bodyEl) {
+        const bodyText = bodyEl.value;
+        if (bodyText.trim()) {
+          try {
+             JSON.parse(bodyText); 
+             body = bodyText;
+          } catch(e) {
+             body = bodyText; 
+          }
+        }
+      }
+
+      const result = await runRequest(method, path, body, auth);
+      
+      const statusBar = document.getElementById(`resp-status-${id}`);
+      const bodyView = document.getElementById(`resp-body-${id}`);
+      
+      if (statusBar && bodyView) {
+        statusBar.innerHTML = `
+          <span class="status-pill ${getStatusClass(result.status)}">${result.status} ${getStatusLabel(result.status)}</span>
+          <span>Time: ${result.duration}ms</span>
+        `;
+        bodyView.innerHTML = highlight(result.data);
+      }
+      
+      // Auto-extract handlers
+      if (id === 'auth-login' && result.ok && result.data?.data?.token) {
+        setToken(result.data.data.token);
+      }
+      if (id === 'auth-register' && result.ok && result.data?.data?.token) {
+        setToken(result.data.data.token);
+      }
+      
+      if (id === 'svc-all' && result.ok && result.data?.data?.[0]?.id) {
+        serviceIdCache = result.data.data[0].id;
+        document.getElementById('url-svc-id').value = `/api/v1/services/${serviceIdCache}`;
+        document.getElementById('url-svc-book').value = `/api/v1/services/${serviceIdCache}/book`;
+        // update cart auto-fill
+        const cartBodyEl = document.getElementById('body-cart-add');
+        if (cartBodyEl) {
+          try {
+             let j = JSON.parse(cartBodyEl.value);
+             j.item_id = serviceIdCache;
+             cartBodyEl.value = JSON.stringify(j, null, 2);
+          } catch(e){}
+        }
+      }
+
+      if (id === 'pkg-all' && result.ok && result.data?.data?.[0]?.id) {
+        packageIdCache = result.data.data[0].id;
+        document.getElementById('url-pkg-id').value = `/api/v1/packages/${packageIdCache}`;
+        document.getElementById('url-pkg-add').value = `/api/v1/packages/${packageIdCache}/add-to-cart`;
+      }
+      
+      if (id === 'pay-txs' && result.ok && result.data?.data?.[0]?.id) {
+        document.getElementById('url-pay-tx-id').value = `/api/v1/payments/transactions/${result.data.data[0].id}`;
+      }
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    function fillDateHelper(id) {
+      const el = document.getElementById(`body-${id}`);
+      if (!el) return;
+      try {
+        const json = JSON.parse(el.value);
+        const d = new Date();
+        d.setDate(d.getDate() + 3);
+        json.scheduled_at = d.toISOString();
+        el.value = JSON.stringify(json, null, 2);
+      } catch (e) {
+        alert("Invalid JSON body");
+      }
+    }
+
+    function fillUuidHelper(id) {
+      const el = document.getElementById(`body-${id}`);
+      if (!el) return;
+      try {
+        const json = JSON.parse(el.value);
+        json.idempotency_key = crypto.randomUUID();
+        el.value = JSON.stringify(json, null, 2);
+      } catch (e) {
+        alert("Invalid JSON body");
+      }
+    }
+
+    // Scenarios Setup
+    function renderScenarios() {
+      const list = document.getElementById('scenarios-list');
+      list.innerHTML = '';
+      scenarios.forEach(sc => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div class="scenario-row">
+            <div>${sc.title}</div>
+            <div style="display:flex; gap: 1rem; align-items: center;">
+              <span id="sc-res-${sc.id}" class="scenario-result">---</span>
+              <button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="toggleLog(${sc.id})">Logs</button>
+              <button class="btn" id="sc-btn-${sc.id}" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="runSingleScenario(${sc.id})">
+                <span class="spinner"></span>Run
+              </button>
+            </div>
+          </div>
+          <div class="scenario-log" id="sc-log-${sc.id}"></div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function toggleLog(id) {
+      document.getElementById(`sc-log-${id}`).classList.toggle('active');
+    }
+
+    function log(id, msg) {
+      const el = document.getElementById(`sc-log-${id}`);
+      el.innerHTML += msg + '\n';
+    }
+
+    async function runSingleScenario(id) {
+      const btn = document.getElementById(`sc-btn-${id}`);
+      if (btn) { btn.classList.add('loading'); btn.disabled = true; }
+      const logEl = document.getElementById(`sc-log-${id}`);
+      logEl.innerHTML = '';
+      const resEl = document.getElementById(`sc-res-${id}`);
+      resEl.innerHTML = 'Running...';
+      
+      const sc = scenarios.find(s => s.id === id);
+      const passed = await sc.fn(id);
+      
+      resEl.innerHTML = passed ? '✅ PASS' : '❌ FAIL';
+      resEl.style.color = passed ? 'var(--accent-primary)' : 'var(--accent-danger)';
+      
+      if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
+      return passed;
+    }
+
+    async function runAllScenarios() {
+      const btn = document.getElementById('run-all-btn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      
+      const rows = document.getElementById('summary-rows');
+      rows.innerHTML = '';
+      let passedCount = 0;
+      
+      for (const sc of scenarios) {
+        const passed = await runSingleScenario(sc.id);
+        if (passed) passedCount++;
+        
+        rows.innerHTML += `
+          <div style="display:flex; border-bottom: 1px solid var(--border-color); padding: 0.5rem 0;">
+            <div style="flex:1">${sc.title}</div>
+            <div style="width:100px; text-align:right">${passed ? '✅' : '❌'}</div>
+          </div>
+        `;
+      }
+      
+      document.getElementById('summary-footer').innerHTML = `${passedCount}/5 PASSED — Click ❌ to see details in logs`;
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    // Scenario Implementations
+    async function runScenario1(id) {
+      log(id, 'Starting Full Auth Flow...');
+      const email = `test_${Date.now()}@ajeer.app`;
+      log(id, `1. POST /auth/register with email: ${email}`);
+      const r1 = await runRequest('POST', '/api/v1/auth/register', JSON.stringify({
+        name: "Scenario User", email: email, password: "password123", password_confirmation: "password123", city: "Riyadh"
+      }), false);
+      if (r1.status !== 201 && r1.status !== 200) { log(id, `FAIL: Register returned ${r1.status}`); return false; }
+      
+      const token = r1.data?.data?.token;
+      if (!token) { log(id, `FAIL: No token in register response`); return false; }
+      setToken(token);
+      log(id, `2. Token stored automatically.`);
+      
+      log(id, `3. GET /auth/me`);
+      const r2 = await runRequest('GET', '/api/v1/auth/me', null, true);
+      if (r2.status !== 200) { log(id, `FAIL: /auth/me returned ${r2.status}`); return false; }
+      
+      log(id, `4. POST /auth/logout`);
+      const r3 = await runRequest('POST', '/api/v1/auth/logout', null, true);
+      if (r3.status !== 200 && r3.status !== 204) { log(id, `FAIL: Logout returned ${r3.status}`); return false; }
+      
+      clearToken();
+      log(id, `SUCCESS: Flow completed normally.`);
+      return true;
+    }
+
+    async function runScenario2(id) {
+      log(id, 'Starting Trial Subscription Check...');
+      log(id, `1. POST /auth/login (demo@ajeer.app)`);
+      const r1 = await runRequest('POST', '/api/v1/auth/login', JSON.stringify({ email: "demo@ajeer.app", password: "password" }), false);
+      if (!r1.data?.data?.token) { log(id, `FAIL: Login failed`); return false; }
+      setToken(r1.data.data.token);
+      
+      log(id, `2. POST /subscriptions/trial`);
+      const r2 = await runRequest('POST', '/api/v1/subscriptions/trial', null, true);
+      log(id, `   First trial response: ${r2.status}`);
+      
+      log(id, `3. POST /subscriptions/trial again`);
+      const r3 = await runRequest('POST', '/api/v1/subscriptions/trial', null, true);
+      log(id, `   Second trial response: ${r3.status}`);
+      if (r3.status !== 422) { log(id, `FAIL: Expected 422 on second trial, got ${r3.status}`); return false; }
+      
+      log(id, `4. GET /subscriptions/my`);
+      const r4 = await runRequest('GET', '/api/v1/subscriptions/my', null, true);
+      if (r4.status !== 200) { log(id, `FAIL: Could not fetch active subscription`); return false; }
+      
+      log(id, `SUCCESS: Trial behaves correctly.`);
+      return true;
+    }
+
+    async function runScenario3(id) {
+      log(id, 'Starting Gateway City Filter Check...');
+      
+      log(id, `1. GET /payments/gateways?city=Riyadh&module=booking`);
+      const r1 = await runRequest('GET', '/api/v1/payments/gateways?city=Riyadh&module=booking', null, false);
+      const gw1 = r1.data?.data?.map(g => g.key) || [];
+      if (!gw1.includes('tap')) { log(id, `FAIL: Tap missing in Riyadh booking. Got: ${gw1}`); return false; }
+      
+      log(id, `2. GET /payments/gateways?city=Medina&module=booking`);
+      const r2 = await runRequest('GET', '/api/v1/payments/gateways?city=Medina&module=booking', null, false);
+      const gw2 = r2.data?.data?.map(g => g.key) || [];
+      if (gw2.includes('tap')) { log(id, `FAIL: Tap should not be in Medina booking`); return false; }
+      
+      log(id, `3. GET /payments/gateways?city=Riyadh&module=subscription`);
+      const r3 = await runRequest('GET', '/api/v1/payments/gateways?city=Riyadh&module=subscription', null, false);
+      const gw3 = r3.data?.data?.map(g => g.key) || [];
+      if (!gw3.includes('stripe') || gw3.includes('tap')) { log(id, `FAIL: Expected Stripe, no Tap in Riyadh sub. Got: ${gw3}`); return false; }
+      
+      log(id, `SUCCESS: All gateway filters applied correctly.`);
+      return true;
+    }
+
+    async function runScenario4(id) {
+      log(id, 'Starting Idempotency Check...');
+      log(id, `1. POST /auth/login (demo@ajeer.app)`);
+      const r1 = await runRequest('POST', '/api/v1/auth/login', JSON.stringify({ email: "demo@ajeer.app", password: "password" }), false);
+      if (!r1.data?.data?.token) { log(id, `FAIL: Login failed`); return false; }
+      setToken(r1.data.data.token);
+      
+      const idemKey = `idem-test-${Date.now()}`;
+      log(id, `2. POST /payments/initiate with key="${idemKey}"`);
+      const r2 = await runRequest('POST', '/api/v1/payments/initiate', JSON.stringify({
+        gateway: "moyasar", amount: 49.00, currency: "SAR", module: "subscription", city: "Riyadh", idempotency_key: idemKey
+      }), true);
+      
+      if (!r2.data?.data?.transaction_id) { log(id, `FAIL: Initiate 1 failed or no transaction_id. Status: ${r2.status}`); return false; }
+      const tx1 = r2.data.data.transaction_id;
+      
+      log(id, `3. POST /payments/initiate with SAME key`);
+      const r3 = await runRequest('POST', '/api/v1/payments/initiate', JSON.stringify({
+        gateway: "moyasar", amount: 49.00, currency: "SAR", module: "subscription", city: "Riyadh", idempotency_key: idemKey
+      }), true);
+      
+      if (!r3.data?.data?.transaction_id) { log(id, `FAIL: Initiate 2 failed. Status: ${r3.status}`); return false; }
+      const tx2 = r3.data.data.transaction_id;
+      
+      if (tx1 !== tx2) { log(id, `FAIL: Mismatch! tx1=${tx1}, tx2=${tx2}`); return false; }
+      
+      log(id, `SUCCESS: Both returned transaction_id ${tx1}`);
+      return true;
+    }
+
+    async function runScenario5(id) {
+      log(id, 'Starting Cart Flow Check...');
+      log(id, `1. POST /auth/login (demo@ajeer.app)`);
+      const r1 = await runRequest('POST', '/api/v1/auth/login', JSON.stringify({ email: "demo@ajeer.app", password: "password" }), false);
+      if (!r1.data?.data?.token) { log(id, `FAIL: Login failed`); return false; }
+      setToken(r1.data.data.token);
+      
+      log(id, `2. GET /services`);
+      const r2 = await runRequest('GET', '/api/v1/services', null, false);
+      const svcId = r2.data?.data?.[0]?.id;
+      if (!svcId) { log(id, `FAIL: No services available to add to cart`); return false; }
+      
+      log(id, `3. DELETE /cart (cleanup)`);
+      await runRequest('DELETE', '/api/v1/cart', null, true);
+      
+      log(id, `4. POST /cart/items (service, qty=1)`);
+      const r3 = await runRequest('POST', '/api/v1/cart/items', JSON.stringify({ item_id: svcId, item_type: "service", quantity: 1 }), true);
+      if (r3.status >= 400) { log(id, `FAIL: Add to cart 1 failed. ${r3.status}`); return false; }
+      
+      log(id, `5. POST /cart/items (SAME service, qty=1)`);
+      const r4 = await runRequest('POST', '/api/v1/cart/items', JSON.stringify({ item_id: svcId, item_type: "service", quantity: 1 }), true);
+      if (r4.status >= 400) { log(id, `FAIL: Add to cart 2 failed. ${r4.status}`); return false; }
+      
+      log(id, `6. GET /cart`);
+      const r5 = await runRequest('GET', '/api/v1/cart', null, true);
+      const items = r5.data?.data?.items || [];
+      const total = r5.data?.data?.total_items || 0;
+      
+      if (items.length !== 1) { log(id, `FAIL: Expected items.length=1, got ${items.length}`); return false; }
+      if (items[0].quantity !== 2) { log(id, `FAIL: Expected item quantity=2, got ${items[0].quantity}`); return false; }
+      if (total !== 2) { log(id, `FAIL: Expected total_items=2, got ${total}`); return false; }
+      
+      log(id, `7. DELETE /cart`);
+      await runRequest('DELETE', '/api/v1/cart', null, true);
+      
+      const r6 = await runRequest('GET', '/api/v1/cart', null, true);
+      const endTotal = r6.data?.data?.total_items || 0;
+      if (endTotal !== 0) { log(id, `FAIL: Cart not empty after DELETE`); return false; }
+      
+      log(id, `SUCCESS: Cart aggregates items correctly.`);
+      return true;
+    }
+
+    // Run on load
+    document.addEventListener('DOMContentLoaded', init);
+
+  </script>
+</body>
+</html>

@@ -20,12 +20,14 @@ class PaymentTransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
-            'gateway' => 'moyasar',
-            'module' => 'booking',
-            'amount' => 150.00,
-            'currency' => 'SAR',
-            'status' => 'pending',
+            'user_id'               => User::factory(),
+            'gateway'               => 'moyasar',
+            'module'                => 'booking',
+            'amount'                => 150.00,
+            'currency'              => 'SAR',
+            'status'                => 'pending',
+            'idempotency_key'       => fake()->uuid(),
+            'gateway_transaction_id'=> null,
         ];
     }
 }

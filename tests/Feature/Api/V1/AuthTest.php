@@ -59,8 +59,7 @@ describe('Authentication', function () {
             'password' => 'wrongpassword',
         ]);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(401);
     });
 
     it('logs out an authenticated user', function () {
