@@ -17,26 +17,41 @@ class CartController extends Controller
 
     public function index(): JsonResponse
     {
-        $cart = $this->cartService->getCartForUser((string) auth()->id());
-        $cart->load('items.service');
-        return response()->json(['data' => $cart]);
+        $cart = $this->cartService->getCartWithItems((string) auth()->id());
+
+        return response()->json([
+            'success' => true,
+            'data' => $cart,
+        ]);
     }
 
     public function store(CartItemData $request): JsonResponse
     {
-        $item = $this->cartService->addItem((string) auth()->id(), $request);
-        return response()->json(['data' => $item], 201);
+        $cart = $this->cartService->addItem((string) auth()->id(), $request);
+
+        return response()->json([
+            'success' => true,
+            'data' => $cart,
+        ], 201);
     }
 
     public function destroy(string $itemId): JsonResponse
     {
         $this->cartService->removeItem((string) auth()->id(), $itemId);
-        return response()->json(null, 204);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from cart.',
+        ]);
     }
 
     public function clear(): JsonResponse
     {
         $this->cartService->clearCart((string) auth()->id());
-        return response()->json(null, 204);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart cleared.',
+        ]);
     }
 }

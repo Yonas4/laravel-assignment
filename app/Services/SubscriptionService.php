@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Data\Subscription\SubscriptionData;
-use App\Enums\SubscriptionPlan;
-use App\Enums\SubscriptionStatus;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Repositories\Contracts\SubscriptionRepositoryInterface;
 use App\Services\Traits\Loggable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 
 class SubscriptionService
@@ -20,11 +20,27 @@ class SubscriptionService
     ) {}
 
     /**
+     * Get all active subscription plans (public).
+     */
+    public function getActivePlans(): Collection
+    {
+        return SubscriptionPlan::where('is_active', true)->get();
+    }
+
+    /**
+     * Get the current active subscription for a user.
+     */
+    public function getActiveSubscription(string $userId): ?Subscription
+    {
+        return $this->subscriptionRepository->findActiveForUser($userId);
+    }
+
+    /**
      * Activate a 14-day free trial for a user.
      *
      * @throws ValidationException
      */
-    public function activateTrial(string $userId): SubscriptionData
+    public function activateTrial(string $userId): Subscription
     {
         $this->logStart('activate_trial', ['user_id' => $userId]);
 
@@ -37,8 +53,16 @@ class SubscriptionService
                 ]);
             }
 
-            // Check if user has ever had a trial plan
-            if ($this->subscriptionRepository->hasHadPlan($userId, SubscriptionPlan::TRIAL->value)) {
+            // Find the trial plan
+            $trialPlan = SubscriptionPlan::where('is_trial', true)->where('is_active', true)->first();
+            if (!$trialPlan) {
+                throw ValidationException::withMessages([
+                    'trial' => ['Trial plan is not available.'],
+                ]);
+            }
+
+            // Check if user has ever had a trial
+            if ($this->subscriptionRepository->hasHadTrial($userId)) {
                 throw ValidationException::withMessages([
                     'trial' => ['User has already used their trial subscription.'],
                 ]);
@@ -47,15 +71,16 @@ class SubscriptionService
             // Create the trial subscription
             $subscription = $this->subscriptionRepository->create([
                 'user_id' => $userId,
-                'plan' => SubscriptionPlan::TRIAL->value,
-                'status' => SubscriptionStatus::ACTIVE->value,
+                'plan_id' => $trialPlan->id,
+                'type' => 'trial',
+                'status' => 'active',
                 'starts_at' => now(),
-                'ends_at' => now()->addDays(14),
+                'ends_at' => now()->addDays($trialPlan->duration_days),
             ]);
 
             $this->logSuccess('activate_trial', ['subscription_id' => $subscription->id]);
 
-            return SubscriptionData::from($subscription);
+            return $subscription;
         } catch (\Throwable $e) {
             $this->logFailure('activate_trial', $e, ['user_id' => $userId]);
             throw $e;

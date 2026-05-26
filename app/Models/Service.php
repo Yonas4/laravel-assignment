@@ -5,33 +5,37 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
+    'category_id',
     'name',
-    'category',
     'description',
     'price',
+    'currency',
     'duration_minutes',
-    'is_available'
+    'is_active',
 ])]
-class Service extends Model
+class Service extends BaseModel
 {
     /** @use HasFactory<\Database\Factories\ServiceFactory> */
-    use HasFactory, HasUlids, SoftDeletes;
+    use HasFactory;
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
             'duration_minutes' => 'integer',
-            'is_available' => 'boolean',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCategory::class, 'category_id');
     }
 
     public function bookings(): HasMany
@@ -41,6 +45,6 @@ class Service extends Model
 
     public function packages(): BelongsToMany
     {
-        return $this->belongsToMany(Package::class, 'package_service');
+        return $this->belongsToMany(Package::class, 'package_services');
     }
 }

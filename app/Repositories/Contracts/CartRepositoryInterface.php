@@ -10,8 +10,12 @@ use App\Models\CartItem;
 interface CartRepositoryInterface
 {
     public function findOrCreateForUser(string $userId): Cart;
-    public function addItem(Cart $cart, array $data): CartItem;
+
+    public function addOrIncrementItem(Cart $cart, array $data): CartItem;
+
     public function removeItem(string $cartItemId): bool;
+
     public function clear(Cart $cart): bool;
+
     public function findByUserId(string $userId): ?Cart;
 }

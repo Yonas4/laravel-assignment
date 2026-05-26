@@ -28,7 +28,7 @@ return [
         ],
         'stripe' => [
             'cities' => ['*'], // All cities
-            'modules' => ['subscription'],
+            'modules' => ['subscription', 'cart'],
         ],
     ],
 

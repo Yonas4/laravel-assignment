@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ServiceRepository implements ServiceRepositoryInterface
 {
-    public function allAvailable(): Collection
+    public function allActive(): Collection
     {
-        return Service::where('is_available', true)->get();
+        return Service::where('is_active', true)->get();
     }
 
     public function findById(string $id): ?Service

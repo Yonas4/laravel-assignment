@@ -5,28 +5,29 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 #[Fillable([
     'cart_id',
-    'service_id',
+    'itemable_type',
+    'itemable_id',
+    'item_type',
+    'name',
     'quantity',
-    'price'
+    'unit_price',
 ])]
-class CartItem extends Model
+class CartItem extends BaseModel
 {
     /** @use HasFactory<\Database\Factories\CartItemFactory> */
-    use HasFactory, HasUlids, SoftDeletes;
+    use HasFactory;
 
     protected function casts(): array
     {
         return [
             'quantity' => 'integer',
-            'price' => 'decimal:2',
+            'unit_price' => 'decimal:2',
         ];
     }
 
@@ -35,8 +36,8 @@ class CartItem extends Model
         return $this->belongsTo(Cart::class);
     }
 
-    public function service(): BelongsTo
+    public function itemable(): MorphTo
     {
-        return $this->belongsTo(Service::class);
+        return $this->morphTo();
     }
 }

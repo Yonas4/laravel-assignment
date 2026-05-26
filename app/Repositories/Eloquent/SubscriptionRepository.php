@@ -21,12 +21,12 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
             ->where('ends_at', '>', now())
             ->first();
     }
-    
-    public function hasHadPlan(string $userId, string $plan): bool
+
+    public function hasHadTrial(string $userId): bool
     {
         return Subscription::withTrashed()
             ->where('user_id', $userId)
-            ->where('plan', $plan)
+            ->where('type', 'trial')
             ->exists();
     }
 }

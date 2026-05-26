@@ -15,6 +15,8 @@ class PaymentInitiateData extends Data
         public PaymentGateway $gateway,
         public PaymentModule $module,
         public float $amount,
+        public string $city,
+        public string $idempotency_key,
         public Currency $currency = Currency::SAR,
     ) {}
 }

@@ -5,31 +5,19 @@ declare(strict_types=1);
 namespace App\Repositories\Contracts;
 
 use App\Models\PaymentTransaction;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface PaymentTransactionRepositoryInterface
 {
-    /**
-     * Create a new payment transaction.
-     */
     public function create(array $data): PaymentTransaction;
 
-    /**
-     * Find a payment transaction by its ID.
-     */
     public function find(string $id): ?PaymentTransaction;
-    
-    /**
-     * Find a payment transaction by gateway transaction ID.
-     */
+
     public function findByGatewayTransactionId(string $gatewayTransactionId): ?PaymentTransaction;
 
-    /**
-     * Update an existing payment transaction.
-     */
+    public function findByIdempotencyKey(string $idempotencyKey): ?PaymentTransaction;
+
     public function update(PaymentTransaction $transaction, array $data): bool;
 
-    /**
-     * Get paginated transactions for a user.
-     */
-    public function getForUser(string $userId, int $perPage = 15): \Illuminate\Pagination\LengthAwarePaginator;
+    public function getForUser(string $userId, int $perPage = 15): LengthAwarePaginator;
 }
