@@ -13,11 +13,11 @@ describe('Payment Gateways Availability', function () {
             ->assertJsonStructure([
                 'success',
                 'data' => [
-                    'gateways'
+                    '*' => ['key', 'label']
                 ]
             ]);
             
-        $gateways = collect($response->json('data.gateways'));
+        $gateways = collect($response->json('data'))->pluck('key');
         
         expect($gateways)->toContain('moyasar', 'tap');
     });
@@ -40,11 +40,13 @@ describe('Payment Initiation', function () {
             'module' => 'booking',
             'amount' => 150.00,
             'currency' => 'SAR',
+            'city' => 'Riyadh',
+            'idempotency_key' => (string) \Illuminate\Support\Str::uuid(),
         ], [
             'Authorization' => 'Bearer ' . $token,
         ]);
 
-        $response->assertStatus(200)
+        $response->assertStatus(201)
             ->assertJsonStructure([
                 'success',
                 'data' => [

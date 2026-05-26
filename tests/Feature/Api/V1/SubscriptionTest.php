@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Models\SubscriptionPlan;
+use App\Models\Subscription;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\actingAs;
@@ -10,37 +12,37 @@ use function Pest\Laravel\actingAs;
 describe('Trial Subscription', function () {
     it('allows a new user to activate a trial subscription', function () {
         $user = User::factory()->create();
+        $trialPlan = SubscriptionPlan::factory()->trial()->create();
 
         $response = actingAs($user, 'sanctum')->postJson('/api/v1/subscriptions/trial');
 
-        $response->assertStatus(200)
+        $response->assertStatus(201)
             ->assertJsonStructure([
                 'success',
                 'data' => [
                     'id',
-                    'plan',
+                    'plan_id',
                     'status',
                     'starts_at',
                     'ends_at',
                 ],
             ]);
 
-        assertDatabaseHas('subscriptions', [
+        assertDatabaseHas('user_subscriptions', [
             'user_id' => $user->id,
-            'plan' => 'trial',
+            'plan_id' => $trialPlan->id,
             'status' => 'active',
         ]);
-        
-        // Assert ends_at is 14 days from now. 
-        // Note: the test should just ensure it gets created. We can refine the 14 days check in a unit test.
     });
 
     it('prevents a user from activating trial twice', function () {
         $user = User::factory()->create();
+        $trialPlan = SubscriptionPlan::factory()->trial()->create();
         
-        \App\Models\Subscription::factory()->create([
+        Subscription::factory()->create([
             'user_id' => $user->id,
-            'plan' => 'trial',
+            'plan_id' => $trialPlan->id,
+            'type' => 'trial',
             'status' => 'active',
         ]);
 
